@@ -9,10 +9,6 @@ import React from 'react'
 const Page = async () => {
   const user = await getcurrentUser();
 
-  if (!user) {
-    return <p>Please log in to view your interviews.</p>;
-  }
-
   const [ userInterviews, latestInterviews ] = await Promise.all([
      getInterviewByUserId(user?.id!),
      getLatestInterviews({ userId: user?.id!})
