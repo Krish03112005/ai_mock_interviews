@@ -1,7 +1,7 @@
 import InterviewCard from '@/components/InterviewCard'
 import { Button } from '@/components/ui/button'
-import { dummyInterviews } from '@/constants'
-import { getcurrentUser, getInterviewByUserId, getLatestInterviews } from '@/lib/actions/auth.action'
+import { getcurrentUser } from '@/lib/actions/auth.action'
+import { getInterviewByUserId, getLatestInterviews } from "@/lib/actions/general.action"
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
@@ -9,11 +9,15 @@ import React from 'react'
 const Page = async () => {
   const user = await getcurrentUser();
 
+  if (!user) {
+    return <p>Please log in to view your interviews.</p>;
+  }
+
   const [ userInterviews, latestInterviews ] = await Promise.all([
-    await getInterviewByUserId(user?.id!),
-    await getLatestInterviews({ userId: user?.id! })
+     getInterviewByUserId(user.id ?? ''),
+     getLatestInterviews({ userId: user.id ?? '' })
   ])
-  
+
   const hasUpcommingInterviews = latestInterviews?.length > 0;
   const hasPastInterviews = userInterviews?.length > 0;
 
@@ -38,9 +42,8 @@ const Page = async () => {
         <h2>Your Interview</h2>
 
         <div className='interviews-section'>
-          {
-            hasUpcommingInterviews ? (
-              latestInterviews?.map((interview) => (
+          {hasPastInterviews ? (
+              userInterviews?.map((interview) => (
                 <InterviewCard {...interview} key={interview.id}/>
               ))
             ) : (
@@ -57,8 +60,8 @@ const Page = async () => {
 
         <div className='interviews-section'>
           {
-            hasPastInterviews ? (
-              userInterviews?.map((interview) => (
+            hasUpcommingInterviews ? (
+              latestInterviews?.map((interview) => (
                 <InterviewCard {...interview} key={interview.id}/>
               ))
             ) : (
